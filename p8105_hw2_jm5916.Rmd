@@ -106,7 +106,7 @@ Gwy_TW <-
   read_excel("./202509 Trash Wheel Collection Data.xlsx", 
       sheet = "Gwynns Falls Trash Wheel", range = "A2:L351") %>% 
   #clean Prof_TW
-  janitor::clean_names() %>%   #make names snake case
+  janitor::clean_names() %>% #make names snake case
   mutate(
     trash_wheel = "Gwynns") %>% #add new variable to keep track of which Trash Wheel is which
   relocate(trash_wheel)
@@ -160,7 +160,7 @@ zip_zori = right_join(zip, zori, by = "zip_code") %>% #join zip to zori
   arrange(zip_code, year) #sort by zip code and year
 ```
 ### Explanation 
-`zip_zori` shows the average rent price by zip code and date. Unnecessary information from `zip` and `zori` were removed for ease of reading. There are `r nrow(zip_zori)` observations. There are `r count(distinct(zip_zori, zip_code))` unique zip codes and `r count(distinct(zip_zori, neighborhood))` unique neighborhoods.
+`zip_zori` shows the average rent price by zip code and date. Unnecessary information from `zip` and `zori` were removed for ease of reading. There are `r nrow(zip_zori)` observations. There are `r count(distinct(zip_zori, zip_code))` unique zip codes and `r count(distinct(zip_zori, neighborhood))-1 #there was a NA` unique neighborhoods.
 
 ### Compare zip codes in the datasets  
 ```{r problem3_compare}
