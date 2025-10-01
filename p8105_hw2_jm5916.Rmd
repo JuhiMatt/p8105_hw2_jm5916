@@ -1,0 +1,30 @@
+---
+title: "p8105_hw2_jm5916"
+author: "Juhi Mattekatt"
+date: "2025-09-30"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# Problem 1
+
+```{r problem1_setup, message = FALSE}
+#read data in 
+pols_month <- read_csv(file = "./fivethirtyeight_datasets/pols-month.csv")
+unemployment <- read_csv(file = "./fivethirtyeight_datasets/unemployment.csv")
+snp <- read_csv(file = "./fivethirtyeight_datasets/snp.csv")
+
+#check datasets
+names(pols_month)
+names(unemployment)
+names(snp)
+```
+I've imported the three datasets in using relative paths. The files are in the fivethirtyeight_datasets folder within my subdirectory for this homework. I viewed the data (in console) and checked to see how the names were formatted
+```{r problem1_manage_datasets}
+
+```
+
