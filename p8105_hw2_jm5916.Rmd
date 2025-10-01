@@ -67,7 +67,8 @@ unemployment_merge <- unemployment %>%
   relocate(year, month) %>% 
   select(-month_abb) #remove abbreviated month column
 ```
-I've created 3 new datasets (I kept the old datasets as is in case I made any mistakes while cleaning the data) to make the keys I'm joining by compatible with each other.
+I've created 3 new datasets (I kept the old datasets as is in case I made any mistakes while cleaning the data since there were a lot of changes, I'vre removed intermediate datasets in the other problems) to make the keys I'm joining by compatible with each other.
+
 ```{r problem1_merge}
 #left join snp into pols_month
 pols_snp = left_join(pols_month_merge, snp_merge, by = c("year", "month"))
@@ -75,7 +76,6 @@ pols_snp = left_join(pols_month_merge, snp_merge, by = c("year", "month"))
 #left join unemployment into snp_pols
 pols_snp_unemployment = left_join(pols_snp, unemployment_merge, by = c("year", "month"))
 ```
-
 ### Explanation 
 The dataset `pols_month` contains information on the number of national politicians (president, senators, governors, and representatives) who are democratic or republican at some time point. `snp` indicates the closing values of the S&P stock index at a given date, and `unemployment` identifies % unemployment for every month of a given year. My final dataset `pols_snp_unemployment` has `r nrow(pols_snp_unemployment)` rows and `r ncol(pols_snp_unemployment)` columns and combines all the information from the above datasets for the years and months described in `pols_month`. Overall, there will be data on political parties in power and economic indicators for a time period. The years range from `r min(pols_snp_unemployment$year)` to `r max(pols_snp_unemployment$year)`, and key variables include `president`, `close`, and `%_unemployment`. 
 
@@ -134,5 +134,65 @@ TW_tidy <- bind_rows(Mr_TW, Prof_TW, Gwy_TW)
 
 # Problem 3
 ```{r problem3_setup, message = FALSE}
-
+#import datasets 
+zip <- read_csv("./zillow_data/Zip Codes.csv") %>% 
+    janitor::clean_names() %>% #make names snake case
+    distinct(zip_code, .keep_all = TRUE)
+zori <- read_csv("./zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv")%>% 
+    janitor::clean_names() #make names snake case
 ```
+I imported the datasets, viewed the data, and cleaned their names.
+
+```{r problem3_join, message = FALSE}
+#clean zori for merging
+zori<- zori %>% 
+  rename(zip_code = region_name) %>% #zip code is under region_name in zori rename
+  pivot_longer( #zori is spread out over multiple columns so I'll condense 
+    x2015_01_31:x2024_08_31,
+    names_to = "date", 
+    names_prefix = "x",
+    values_to = "zori") %>% 
+  filter(!is.na(zori)) %>% #remove rows without any zori info
+  separate(date, into = c("year", "month", "day"), sep = "_") %>% #maintain data integrity
+  mutate( #change month numbers into words
+    month = as.integer(month),
+    month = month.name[month])
+
+#join datasets by zip code
+zip_zori = right_join(zip, zori, by = "zip_code") %>% #join zip to zori
+  select(zip_code, neighborhood, county, year, month, day, zori) %>%  #only keep important info
+  arrange(zip_code, year) #sort by zip code and year
+```
+### Explanation 
+`zip_zori` shows the average rent price by zip code and date. Unnecessary information from `zip` and `zori` were removed for ease of reading. There are `r nrow(zip_zori)` observations. There are `r count(distinct(zip_zori, zip_code))` unique zip codes and `r count(distinct(zip_zori, neighborhood))` unique neighborhoods.
+
+### Compare zip codes in the datasets  
+```{r problem3_compare}
+in_zip_not_zori = anti_join(zip, zori, by = "zip_code") %>% #see which zip codes are not shared
+  relocate(zip_code)
+```
+There are `r nrow(in_zip_not_zori)` zip codes in the ZIP code dataset that are not in the Zillow Rental Price dataset. There are a number of reasons why these zip codes aren't included in the Zillow Rental Price dataset. One of the zip codes is 10474 in the Bronx, this is a pretty industrial area and there may not be many places to rent in this zip code. As such, Zillow might not report this data. 10020 in Midtown is another example of a zip code with more commerce than residence. Another reason is that some zip codes are wealthy, and people living in these areas will be homeowners rather than renters, thus their zip codes wouldn't be included in a rental price dataset. This could be the case for 11224, which includes the gated community of Seagate. Many of the zip codes in Richmond county (Staten Island) may fall under this category due to many people in Staten Island being homeowners. Another reason could be that the zip codes may include areas that Zillow doesn't consider part of NYC, for instance 10705 and 10704 both go into Yonkers, so data on rental prices there may not be put into a dataset specific to NYC.
+
+### Rental prices fluctuations 
+```{r problem3_price_flex}
+price_flex <- zip_zori %>% 
+  filter((year == 2020 & month == "January") | (year == 2021 & month == "January")) %>%
+  pivot_wider(
+    names_from = year, 
+    values_from = zori,
+    names_prefix = "zori_") %>%
+  mutate(
+    price_fluctuation = round(zori_2021 - zori_2020, 2),
+    borough = recode(county,
+                     "New York" = "Manhattan",
+                     "Brooklyn" = "Kings",
+                     "Staten Island" = "Richmond")) %>%
+  select(zip_code, neighborhood, borough, zori_2020, zori_2021, price_fluctuation) %>%
+  arrange(price_fluctuation) %>% 
+  slice(1:10)
+
+#view table in file
+knitr::kable(price_flex)
+```
+Lower Manhattan saw the largest drops in rental prices during the COVID-19 pandemic. This may be in part due to lower Manhattan having among the highest rent prices in the city. These prices would have been unsustainable during an increased cost of living crisis and decreased job security, so landlords likely had to lower rent prices greatly.
+
