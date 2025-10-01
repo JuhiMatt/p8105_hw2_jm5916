@@ -16,11 +16,7 @@ library(tidyverse)
 pols_month <- read_csv(file = "./fivethirtyeight_datasets/pols-month.csv")
 unemployment <- read_csv(file = "./fivethirtyeight_datasets/unemployment.csv")
 snp <- read_csv(file = "./fivethirtyeight_datasets/snp.csv")
-
-#check datasets
-names(pols_month)
-names(unemployment)
-names(snp)
+#check datasets in console
 ```
 I've imported the three datasets in using relative paths. The files are in the fivethirtyeight_datasets folder within my subdirectory for this homework. I viewed the data (in console) and checked to see how the names were formatted.
 
@@ -67,14 +63,13 @@ unemployment_merge <- unemployment %>%
   relocate(year, month) %>% 
   select(-month_abb) #remove abbreviated month column
 ```
-I've created 3 new datasets (I kept the old datasets as is in case I made any mistakes while cleaning the data since there were a lot of changes, I'vre removed intermediate datasets in the other problems) to make the keys I'm joining by compatible with each other.
+I've created 3 new datasets (I kept the old datasets as is in case I made any mistakes while cleaning the data since there were a lot of changes, I've removed intermediate datasets in the other problems) to make the keys I'm joining by compatible with each other.
 
 ```{r problem1_merge}
-#left join snp into pols_month
-pols_snp = left_join(pols_month_merge, snp_merge, by = c("year", "month"))
-
-#left join unemployment into snp_pols
-pols_snp_unemployment = left_join(pols_snp, unemployment_merge, by = c("year", "month"))
+#left join unemployment and snp into pols_month
+pols_snp_unemployment <- pols_month_merge %>% 
+  left_join(snp_merge, by = c("year", "month")) %>% 
+  left_join(unemployment_merge, by = c("year", "month"))
 ```
 ### Explanation 
 The dataset `pols_month` contains information on the number of national politicians (president, senators, governors, and representatives) who are democratic or republican at some time point. `snp` indicates the closing values of the S&P stock index at a given date, and `unemployment` identifies % unemployment for every month of a given year. My final dataset `pols_snp_unemployment` has `r nrow(pols_snp_unemployment)` rows and `r ncol(pols_snp_unemployment)` columns and combines all the information from the above datasets for the years and months described in `pols_month`. Overall, there will be data on political parties in power and economic indicators for a time period. The years range from `r min(pols_snp_unemployment$year)` to `r max(pols_snp_unemployment$year)`, and key variables include `president`, `close`, and `%_unemployment`. 
@@ -130,7 +125,7 @@ Gwy_TW <- Gwy_TW %>%
 TW_tidy <- bind_rows(Mr_TW, Prof_TW, Gwy_TW)
 ```
 ### Explanation
-`TW_tidy` contains information on the types and amounts of trash collected by 3 trash wheels (Mr. Trash Wheel, Professor Trash Wheel, and the Gwynns Falls Trash Wheel/Gwynnda) from 2014-2025. There are `r nrow(TW_tidy)` observations. Some key variables include `date` (date dumpster was collected), `weight_tons` (weight of each dumpster in tons), `volume_cubic_yards` (volume of waste collected from each dumpster in cubic yards), and `homes_powered` (number of homes powered by waste collected). The total weight of trash collected by Professor Trash Wheel was `r sum((filter(TW_tidy, trash_wheel == "Prof")$weight_tons))` tons. There was no missing data for `weight_tons`. The total number of cigarette butts collected by Gwynnda in June of 2022 was`r sum((filter(TW_tidy, trash_wheel == "Gwynns", month == "June", year == "2011")$cigarette_butts))`.
+`TW_tidy` contains information on the types and amounts of trash collected by 3 trash wheels (Mr. Trash Wheel, Professor Trash Wheel, and the Gwynns Falls Trash Wheel/Gwynnda) from 2014-2025. There are `r nrow(TW_tidy)` observations. Some key variables include `date` (date dumpster was collected), `weight_tons` (weight of each dumpster in tons), `volume_cubic_yards` (volume of waste collected from each dumpster in cubic yards), and `homes_powered` (number of homes powered by waste collected). The total weight of trash collected by Professor Trash Wheel was `r sum((filter(TW_tidy, trash_wheel == "Prof")$weight_tons))` tons. There was no missing data for `weight_tons`. The total number of cigarette butts collected by Gwynnda in June of 2022 was`r sum((filter(TW_tidy, trash_wheel == "Gwynns", month == "June", year == "2022")$cigarette_butts))`.
 
 # Problem 3
 ```{r problem3_setup, message = FALSE}
