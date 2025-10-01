@@ -7,6 +7,7 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 999)  # Disable scientific notation for problem 2
 library(tidyverse)
 ```
 
@@ -125,7 +126,7 @@ Gwy_TW <- Gwy_TW %>%
 TW_tidy <- bind_rows(Mr_TW, Prof_TW, Gwy_TW)
 ```
 ### Explanation
-`TW_tidy` contains information on the types and amounts of trash collected by 3 trash wheels (Mr. Trash Wheel, Professor Trash Wheel, and the Gwynns Falls Trash Wheel/Gwynnda) from 2014-2025. There are `r nrow(TW_tidy)` observations. Some key variables include `date` (date dumpster was collected), `weight_tons` (weight of each dumpster in tons), `volume_cubic_yards` (volume of waste collected from each dumpster in cubic yards), and `homes_powered` (number of homes powered by waste collected). The total weight of trash collected by Professor Trash Wheel was `r sum((filter(TW_tidy, trash_wheel == "Prof")$weight_tons))` tons. There was no missing data for `weight_tons`. The total number of cigarette butts collected by Gwynnda in June of 2022 was`r sum((filter(TW_tidy, trash_wheel == "Gwynns", month == "June", year == "2022")$cigarette_butts))`.
+`TW_tidy` contains information on the types and amounts of trash collected by 3 trash wheels (Mr. Trash Wheel, Professor Trash Wheel, and the Gwynns Falls Trash Wheel/Gwynnda) from 2014-2025. There are `r nrow(TW_tidy)` observations. Some key variables include `date` (date dumpster was collected), `weight_tons` (weight of each dumpster in tons), `volume_cubic_yards` (volume of waste collected from each dumpster in cubic yards), and `homes_powered` (number of homes powered by waste collected). The total weight of trash collected by Professor Trash Wheel was `r sum((filter(TW_tidy, trash_wheel == "Prof")$weight_tons))` tons. There was no missing data for `weight_tons`. The total number of cigarette butts collected by Gwynnda in June of 2022 was `r sum((filter(TW_tidy, trash_wheel == "Gwynns", month == "June", year == "2022")$cigarette_butts))`.
 
 # Problem 3
 ```{r problem3_setup, message = FALSE}
