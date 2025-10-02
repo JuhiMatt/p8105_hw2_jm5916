@@ -4,7 +4,6 @@ author: "Juhi Mattekatt"
 date: "2025-09-30"
 output: github_document
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 options(scipen = 999)  # Disable scientific notation for problem 2
@@ -166,6 +165,9 @@ zip_zori = right_join(zip, zori, by = "zip_code") %>% #join zip to zori
 ```{r problem3_compare}
 in_zip_not_zori = anti_join(zip, zori, by = "zip_code") %>% #see which zip codes are not shared
   relocate(zip_code)
+
+#show all zip codes that exist only in zip
+in_zip_not_zori$zip_code
 ```
 There are `r nrow(in_zip_not_zori)` zip codes in the ZIP code dataset that are not in the Zillow Rental Price dataset. There are a number of reasons why these zip codes aren't included in the Zillow Rental Price dataset. One of the zip codes is 10474 in the Bronx, this is a pretty industrial area and there may not be many places to rent in this zip code. As such, Zillow might not report this data. 10020 in Midtown is another example of a zip code with more commerce than residence. Another reason is that some zip codes are wealthy, and people living in these areas will be homeowners rather than renters, thus their zip codes wouldn't be included in a rental price dataset. This could be the case for 11224, which includes the gated community of Seagate. Many of the zip codes in Richmond county (Staten Island) may fall under this category due to many people in Staten Island being homeowners. Another reason could be that the zip codes may include areas that Zillow doesn't consider part of NYC, for instance 10705 and 10704 both go into Yonkers, so data on rental prices there may not be put into a dataset specific to NYC.
 
@@ -183,7 +185,7 @@ price_flex <- zip_zori %>%
                      "New York" = "Manhattan",
                      "Brooklyn" = "Kings",
                      "Staten Island" = "Richmond")) %>%
-  select(zip_code, neighborhood, borough, zori_2020, zori_2021, price_fluctuation) %>%
+  select(zip_code, neighborhood, borough, price_fluctuation) %>%
   arrange(price_fluctuation) %>% 
   slice(1:10)
 
